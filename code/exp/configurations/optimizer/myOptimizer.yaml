@@ -1,0 +1,5 @@
+### myOptimizer.yaml
+
+# Options for the Adam optimizer
+lr: 1e-5
+weight_decay: 5e-4
