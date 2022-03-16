@@ -26,11 +26,12 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
     def pooling_func(self, x, method='mean'):
         return reduce(x, 'n d -> d', method)
 
-    def forward(self, node_feats, adj):
+    def forward(self, node_feats, edge_feats, edge_indices, adj):
         node_feats = torch.tensor(node_feats, dtype=torch.float)
+        edge_feats = torch.tensor(edge_feats, dtype=torch.float)
 
         # Run the actual GNN model
-        x = self.model(node_feats, adj) # x: (N x n_classes)
+        x = self.model(node_feats, edge_feats, edge_indices, adj) # x: (N x n_classes)
 
         # Apply the necessary pooling (depending on the task)
         if self.hpars.experiment.graph_level:
@@ -53,8 +54,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         adj = graph.adj().to_dense()
         node_feats = graph.ndata['feat']    # n_nodes x f
         edge_feats = graph.edata['feat']    # n_edges x f'
+        edge_indices = graph.edges()
 
-        y_hat = self.forward(node_feats, adj)
+        y_hat = self.forward(node_feats, edge_feats, edge_indices, adj)
 
         # Filter out the final predictions and the labels (if node-level task)
         if self.hpars.experiment.node_level:
@@ -78,8 +80,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         adj = graph.adj().to_dense()
         node_feats = graph.ndata['feat']
         edge_feats = graph.edata['feat']
+        edge_indices = graph.edges()
 
-        y_hat = self.forward(node_feats, adj)
+        y_hat = self.forward(node_feats, edge_feats, edge_indices, adj)
 
         # Filter out the final predictions and the labels (if node-level task)
         if self.hpars.experiment.node_level:
@@ -100,8 +103,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         adj = graph.adj().to_dense()
         node_feats = graph.ndata['feat']
         edge_feats = graph.edata['feat']
+        edge_indices = graph.edges()
 
-        y_hat = self.forward(node_feats, adj)
+        y_hat = self.forward(node_feats, edge_feats, edge_indices, adj)
 
         # Filter out the final predictions and the labels (if node-level task)
         if self.hpars.experiment.node_level:
