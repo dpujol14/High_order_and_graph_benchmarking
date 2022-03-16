@@ -25,6 +25,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         elif model_name == 'mult_GAT':
             from models.mult_GAT.models import MultGAT
             return MultGAT(self.hpars)
+        elif model_name == 'full_neighborhood_mult_GAT':
+            from models.full_neighborhood_mult_GAT.models import FullNeighborhoodMultGAT
+            return FullNeighborhoodMultGAT(self.hpars)
 
     def pooling_func(self, x, method='mean'):
         return reduce(x, 'n d -> d', method)
