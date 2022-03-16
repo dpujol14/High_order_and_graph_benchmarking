@@ -20,8 +20,11 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         #    from code.model.GCN.model import GCN
         #    return GCN(self.hpars)
         if model_name == 'vanilla_GAT':
-            from models.GAT.models import GAT
+            from models.vanilla_GAT.models import GAT
             return GAT(self.hpars)
+        elif model_name == 'mult_GAT':
+            from models.mult_GAT.models import MultGAT
+            return MultGAT(self.hpars)
 
     def pooling_func(self, x, method='mean'):
         return reduce(x, 'n d -> d', method)

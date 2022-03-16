@@ -1,0 +1,6 @@
+### Configuration multiplicative Gat
+
+name: 'mult_GAT'
+
+# Options of the model
+model_depth: 6   # This is the depth of the model (must be at least 2)

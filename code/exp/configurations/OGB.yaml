@@ -15,4 +15,4 @@ use_normalization: True
 defaults:
     - optimizer: myOptimizer
     - experiment: ogbg-molhiv
-    - model: vanilla_gat
+    - model: vanilla_GAT

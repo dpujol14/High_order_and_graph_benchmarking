@@ -16,7 +16,6 @@ hidden_dim: 128
 n_classes: 2
 edge_feats_dim: 3
 depth: 2
-heads: 4
 dropout: 0.1
-n_heads: 1
+n_heads: 4
 alpha: 0.2

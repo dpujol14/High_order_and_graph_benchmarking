@@ -6,7 +6,7 @@ from scipy.sparse import coo_matrix
 
 class GraphAttentionLayer(nn.Module):
     """
-    Simple GAT layer, similar to https://arxiv.org/abs/1710.10903
+    Extension of the vanilla_GAT layer (based on 3rd order interactions)
     """
     def __init__(self, hpars, in_feats, out_feats, edge_feat_dim, final=False):
         super(GraphAttentionLayer, self).__init__()
@@ -53,7 +53,7 @@ class GraphAttentionLayer(nn.Module):
 
     def _prepare_attentional_mechanism_input(self, Wh, We, edge_indices):
         # Wh.shape (N, out_feature)
-        # self.a.shape (2 * out_feature, 1)
+        # self.a.shape (2 * out_feature + edge_feats_dim, 1)
         # Wh1&2.shape (N, 1)
         # e.shape (N, N)
         Wh1 = torch.matmul(Wh, self.a[:self.out_feats, :])
@@ -61,7 +61,6 @@ class GraphAttentionLayer(nn.Module):
 
         # broadcast add
         e = Wh1 + Wh2.T
-
 
         # If necessary, consider also the edges (check if in this case that this is 0, it wont do anything anyway)
         if self.edge_feat_dim > 0:
