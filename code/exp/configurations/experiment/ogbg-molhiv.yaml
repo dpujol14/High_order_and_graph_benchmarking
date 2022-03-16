@@ -12,10 +12,10 @@ node_level: False
 
 # General options of the model
 in_feats: 9
-hidden_dim: 9
+hidden_dim: 128
 n_classes: 2
 depth: 2
-heads: 1
+heads: 4
 dropout: 0.1
 n_heads: 1
 alpha: 0.2

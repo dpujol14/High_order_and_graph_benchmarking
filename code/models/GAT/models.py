@@ -17,18 +17,37 @@ class GAT(nn.Module):
 
         self.dropout = nn.Dropout(self.hpars.experiment.dropout)
 
-        self.attentions = [GraphAttentionLayer(hpars=self.hpars, in_feats = self.in_feats, out_feats=self.hidden_dim, final=False) for _ in range(self.n_heads)]
-        for i, attention in enumerate(self.attentions):
-            self.add_module('attention_{}'.format(i), attention)
+        self.attention_layers = []
+        # Create the hidden layers that operate in latten F' dimension
+        for i in range(self.model_depth):
+            if i==0:
+                # First layer that maps the input from dimensionality F to F'
+                self.attentions = [GraphAttentionLayer(hpars=self.hpars, in_feats=self.in_feats, out_feats=self.hidden_dim, final=False) for _ in range(self.n_heads)]
+                for j, attention in enumerate(self.attentions):
+                     self.add_module('attention_{}_{}'.format(i,j), attention)
+            elif i == self.model_depth-1:
+                # If this is the last layer, then we need to map it from F' to the output class
+                self.attentions = [GraphAttentionLayer(hpars=self.hpars, in_feats=self.hidden_dim, out_feats=self.n_classes,
+                                        final=False) for _ in range(self.n_heads)]
+                for j, attention in enumerate(self.attentions):
+                    self.add_module('attention_{}_{}'.format(i, j), attention)
+            else:
+                # If this is a hidden layer, then we just do a mapping F' -> F'
+                self.attentions = [
+                    GraphAttentionLayer(hpars=self.hpars, in_feats=self.hidden_dim, out_feats=self.hidden_dim,
+                                        final=False) for _ in range(self.n_heads)]
+                for j, attention in enumerate(self.attentions):
+                    self.add_module('attention_{}_{}'.format(i, j), attention)
 
-        self.out_att = GraphAttentionLayer(hpars = hpars, in_feats=self.in_feats * self.n_heads, out_feats=self.n_classes, final=False)
-
+            self.attention_layers.append(self.attentions)
 
     def forward(self, x, adj, training=True):
-        x = self.dropout(x)
-        x = torch.cat([att(x, adj, training) for att in self.attentions], dim=1)
-        x = self.dropout(x)
-        x = F.elu(self.out_att(x, adj, training))
+        x_hat = x
+        for single_att_layer in self.attention_layers:
+            #x = self.dropout(x)
+            x_hat = torch.cat([att(x_hat, adj, training) for att in single_att_layer], dim=1)
+            # x = self.dropout(x)
+            # x = F.elu(self.out_att(x, adj, training))
 
-        # We return the output of dimension (N x n_classes). This still requires to do proper pooling or so depening on the type of class (e.g., graph)
+        x = F.elu(x_hat)
         return x

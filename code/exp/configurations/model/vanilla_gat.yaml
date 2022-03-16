@@ -3,4 +3,4 @@
 name: 'vanilla_GAT'
 
 # Options of the model
-model_depth: 6   # This is the depth of the model (excluding the last iteration to map to the final dimensionality)
+model_depth: 6   # This is the depth of the model (must be at least 2)
