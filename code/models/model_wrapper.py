@@ -78,7 +78,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.log('train_loss', loss, on_epoch=True)
 
         # Compute the accuracy
-        acc = self.metric_acc(y_hat, y)
+        y_hat = F.softmax(y_hat)
+        acc = self.metric_acc(torch.unsqueeze(y_hat,0), torch.squeeze(y,0))
         self.log('train_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
         return loss
@@ -103,7 +104,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
         self.log('val_loss', loss, on_step=True)
 
-        acc = self.metric_acc(y_hat, y)
+        y_hat = F.softmax(y_hat)
+        acc = self.metric_acc(torch.unsqueeze(y_hat,0), torch.squeeze(y,0))
         self.log('val_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
     def test_step(self, batch, batch_idx):
@@ -127,7 +129,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.log('test_loss', loss)
 
         # Compute the accuracy
-        acc = self.metric_acc(y_hat, y)
+        y_hat = F.softmax(y_hat)
+        acc = self.metric_acc(torch.unsqueeze(y_hat,0), torch.squeeze(y,0))
         self.log('test_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
     def configure_optimizers(self):
