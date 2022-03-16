@@ -25,7 +25,7 @@ class GraphAttentionLayer(nn.Module):
 
         # Learning parameters of the edge features
         self.W_edge = nn.Parameter(torch.empty(size=(self.edge_feat_dim, self.edge_feat_dim)))
-        nn.init.xavier_uniform_(self.W.data, gain=1.414)
+        nn.init.xavier_uniform_(self.W_edge.data, gain=1.414)
 
         # Learning parameters to map (Wh_i || Wh_j || edge_feats_ij)
         self.a = nn.Parameter(torch.empty(size=(2 * self.out_feats + self.edge_feat_dim, 1)))

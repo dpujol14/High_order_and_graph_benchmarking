@@ -24,7 +24,7 @@ class FullNeighborhoodMultGraphLayer(nn.Module):
 
         # Learning parameters of the edge features
         self.W_edge = nn.Parameter(torch.empty(size=(self.edge_feat_dim, self.edge_feat_dim)))
-        nn.init.xavier_uniform_(self.W.data, gain=1.414)
+        nn.init.xavier_uniform_(self.W_edge.data, gain=1.414)
 
         # Learning parameters to map edge_feats_ij \in R^F -> R
         self.a = nn.Parameter(torch.empty(size=(self.edge_feat_dim, 1)))
