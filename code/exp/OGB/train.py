@@ -6,7 +6,7 @@ if os.path.isdir(os.path.abspath("../..")):
 else:
     sys.path.append(os.path.abspath("../.."))
 
-from load_data import load_dataset
+from load_data import load_graph_level_dataset, load_node_level_dataset
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor,ModelCheckpoint,EarlyStopping, DeviceStatsMonitor
 from pytorch_lightning.loggers import MLFlowLogger, TensorBoardLogger
@@ -25,13 +25,21 @@ def main(hpars:DictConfig):
 
     # Load the dataset
     print("Loading the data...")
-    dataset_name = "ogbg-molpcba"
-    data_path = os.path.join(os.path.abspath(hpars.experiment.path_to_data), dataset_name)
+    data_path = os.path.join(os.path.abspath(hpars.experiment.path_to_data), hpars.experiment.exp_name)
     os.makedirs(data_path, exist_ok=True)
-    train_loader, valid_loader, test_loader = load_dataset(data_path=data_path, dataset_name= dataset_name, batch_size=8)
+
+    train_idx, valid_idx, test_idx = None, None, None
+    if hpars.experiment.graph_level:
+        train_loader, valid_loader, test_loader = load_graph_level_dataset(data_path=data_path, dataset_name= hpars.experiment.exp_name, batch_size=1)
+
+    elif hpars.experiment.node_level:
+        data_loader, train_idx, valid_idx, test_idx = load_node_level_dataset(data_path=data_path, dataset_name= hpars.experiment.exp_name, batch_size=1)
+        train_loader = data_loader
+        valid_loader = data_loader
+        test_loader = data_loader
 
     # Load the model
-    model = GraphNeuralNetworkWrapper(hpars)
+    model = GraphNeuralNetworkWrapper(hpars, train_idx, valid_idx, test_idx)
 
     callbacks = [LearningRateMonitor(),
                  DeviceStatsMonitor(),
@@ -42,7 +50,7 @@ def main(hpars:DictConfig):
 
     BACKEND = 'dp'
     my_logger = TensorBoardLogger('tb_logs', name=hpars.experiment.exp_name + '_' + hpars.model.name)
-    # alt_logger = MLFlowLoggerCheckpointer("neural_sorting_net", tracking_uri=MLFLOW_URI),
+
     trainer = pl.Trainer(logger=my_logger,
                          max_epochs=hpars.experiment.epochs,
                          gpus=None if hpars.gpus == -1 else hpars.gpus,

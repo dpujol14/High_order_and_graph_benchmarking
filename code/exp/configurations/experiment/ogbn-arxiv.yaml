@@ -1,19 +1,19 @@
 # This file contains the specific configuration of the experiment ogbg-molhiv from the OGB framework
 
-exp_name: "ogbg-molhiv"
+exp_name: "ogbn-arxiv"
 path_to_data: '../../../../../../data'
 epochs: 2
 
 # Type of class
 classification: True
-graph_level: True
+graph_level: False
 edge_level: False
-node_level: False
+node_level: True
 
 # General options of the model
-in_feats: 9
-hidden_dim: 9
-n_classes: 2
+in_feats: 128
+hidden_dim: 128
+n_classes: 40
 depth: 2
 heads: 1
 dropout: 0.1
