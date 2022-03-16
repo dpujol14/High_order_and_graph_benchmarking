@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from einops import reduce
+import torchmetrics
 
 class GraphNeuralNetworkWrapper(pl.LightningModule):
     def __init__(self, hpars, train_idx=None, valid_idx=None, test_idx=None):
@@ -14,6 +15,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.train_idx = train_idx
         self.valid_idx = valid_idx
         self.test_idx = test_idx
+
+        # METRICS
+        self.metric_acc = torchmetrics.Accuracy()
 
     def choose_model(self, model_name):
         #if model_name == 'vanilla_GCN':
@@ -74,8 +78,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.log('train_loss', loss, on_epoch=True)
 
         # Compute the accuracy
-        #acc = self.metric_acc(y_hat, y)
-        #self.log('train_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
+        acc = self.metric_acc(y_hat, y)
+        self.log('train_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
         return loss
 
@@ -99,8 +103,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
         self.log('val_loss', loss, on_step=True)
 
-        #acc = self.metric_acc(y_hat, y)
-        #self.log('val_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
+        acc = self.metric_acc(y_hat, y)
+        self.log('val_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
     def test_step(self, batch, batch_idx):
         graph, y = batch
@@ -123,8 +127,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.log('test_loss', loss)
 
         # Compute the accuracy
-        #acc = self.metric_acc(y_hat, y)
-        #self.log('test_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
+        acc = self.metric_acc(y_hat, y)
+        self.log('test_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=self.hpars.optimizer.lr, weight_decay=self.hpars.optimizer.weight_decay)
