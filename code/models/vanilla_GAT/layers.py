@@ -18,8 +18,6 @@ class GraphAttentionLayer(nn.Module):
         self.edge_feat_dim = edge_feat_dim
 
         # Learning parameters of the node features
-        print(in_feats)
-        print(out_feats)
         self.W = nn.Parameter(torch.empty(size=(in_feats, self.out_feats)))
         nn.init.xavier_uniform_(self.W.data, gain=1.414)
 

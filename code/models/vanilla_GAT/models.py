@@ -20,7 +20,8 @@ class GAT(nn.Module):
         self.dropout = nn.Dropout(self.hpars.experiment.dropout)
 
         self.attention_layers = []
-        # Create the hidden layers that operate in latten F' dimension
+
+        # Create the hidden layers that operate in lattent F' dimension
         for i in range(self.model_depth):
             if i==0:
                 # First layer that maps the input from dimensionality F to F'
@@ -31,6 +32,7 @@ class GAT(nn.Module):
                                                        final=False) for _ in range(self.n_heads)]
                 for j, attention in enumerate(self.attentions):
                      self.add_module('attention_{}_{}'.format(i,j), attention)
+
             elif i == self.model_depth-1:
                 # If this is the last layer, then we need to map it from F' to the output class
                 self.attentions = [GraphAttentionLayer(hpars=self.hpars,

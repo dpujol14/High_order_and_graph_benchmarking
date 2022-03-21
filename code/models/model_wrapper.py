@@ -17,12 +17,11 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.test_idx = test_idx
 
         # METRICS
-        self.metric_acc = torchmetrics.Accuracy()
+        # Accuracy metrics
+        self.train_acc_metric = torchmetrics.Accuracy()
+        self.val_acc_metric = torchmetrics.Accuracy()
 
     def choose_model(self, model_name):
-        #if model_name == 'vanilla_GCN':
-        #    from code.model.GCN.model import GCN
-        #    return GCN(self.hpars)
         if model_name == 'vanilla_GAT':
             from models.vanilla_GAT.models import GAT
             return GAT(self.hpars)
@@ -105,7 +104,7 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         self.log('val_loss', loss, on_step=True)
 
         y_hat = F.softmax(y_hat)
-        acc = self.metric_acc(torch.unsqueeze(y_hat,0), torch.squeeze(y,0))
+        acc = self.val_acc_metric(torch.unsqueeze(y_hat,0), torch.squeeze(y,0))
         self.log('val_accuracy', acc, on_epoch=True, prog_bar=True, logger=True)
 
     def test_step(self, batch, batch_idx):

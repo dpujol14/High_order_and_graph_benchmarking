@@ -8,8 +8,8 @@ else:
 
 from load_data import load_graph_level_dataset, load_node_level_dataset
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import LearningRateMonitor,ModelCheckpoint,EarlyStopping, DeviceStatsMonitor
-from pytorch_lightning.loggers import MLFlowLogger, TensorBoardLogger
+from pytorch_lightning.callbacks import LearningRateMonitor,ModelCheckpoint, DeviceStatsMonitor
+from pytorch_lightning.loggers import TensorBoardLogger
 import hydra
 from omegaconf import DictConfig
 from codecarbon import EmissionsTracker
