@@ -18,8 +18,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
         # METRICS
         # Accuracy metrics
-        self.train_acc_metric = torchmetrics.Accuracy()
-        self.val_acc_metric = torchmetrics.Accuracy()
+        self.train_acc_metric = torchmetrics.Accuracy(self.hpars.experiment.n_classes)
+        self.val_acc_metric = torchmetrics.Accuracy(self.hpars.experiment.n_classes)
 
     def choose_model(self, model_name):
         if model_name == 'vanilla_GAT':
@@ -61,7 +61,14 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
         # Obtain the data from the graph
         adj = graph.adj().to_dense()
-        node_feats = graph.ndata['feat']    # n_nodes x f
+
+        # Obtain the node features (if exists, o/w 1s)
+        if graph.ndata != {}:
+            node_feats = graph.ndata['feat']    # n_nodes x f
+        else:
+            node_feats = torch.ones(graph.num_nodes(), self.hpars.experiment.in_feats)
+
+        # Obtain the edge features
         edge_feats = graph.edata['feat']    # n_edges x f'
         edge_indices = graph.edges()
 
@@ -88,7 +95,14 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
         # Obtain the data from the graph
         adj = graph.adj().to_dense()
-        node_feats = graph.ndata['feat']
+
+        # Obtain the node features (if exists, o/w 1s)
+        if graph.ndata != {}:
+            node_feats = graph.ndata['feat']    # n_nodes x f
+        else:
+            node_feats = torch.ones(graph.num_nodes(), self.hpars.experiment.in_feats)
+
+        # Obtain the edge features
         edge_feats = graph.edata['feat']
         edge_indices = graph.edges()
 
@@ -112,7 +126,14 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
         # Obtain the data from the graph
         adj = graph.adj().to_dense()
-        node_feats = graph.ndata['feat']
+
+        # Obtain the node features (if exists, o/w 1s)
+        if graph.ndata != {}:
+            node_feats = graph.ndata['feat']    # n_nodes x f
+        else:
+            node_feats = torch.ones(graph.num_nodes(), self.hpars.experiment.in_feats)
+
+        # Obtain the edge features
         edge_feats = graph.edata['feat']
         edge_indices = graph.edges()
 
