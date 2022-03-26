@@ -6,7 +6,7 @@ if os.path.isdir(os.path.abspath("../..")):
 else:
     sys.path.append(os.path.abspath("../.."))
 
-from load_data import load_graph_level_dataset, load_node_level_dataset
+from load_data import load_graph_level_dataset#, load_node_level_dataset
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor,ModelCheckpoint, DeviceStatsMonitor
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -30,10 +30,10 @@ def main(hpars:DictConfig):
 
     train_idx, valid_idx, test_idx = None, None, None
     if hpars.experiment.graph_level:
-        train_loader, valid_loader, test_loader = load_graph_level_dataset(data_path=data_path, dataset_name= hpars.experiment.exp_name, batch_size=1)
+        train_loader, valid_loader, test_loader = load_graph_level_dataset(data_path=data_path, dataset_name= hpars.experiment.exp_name, batch_size=hpars.batch_size)
 
     elif hpars.experiment.node_level:
-        data_loader, train_idx, valid_idx, test_idx = load_node_level_dataset(data_path=data_path, dataset_name= hpars.experiment.exp_name, batch_size=1)
+        data_loader, train_idx, valid_idx, test_idx = load_node_level_dataset(data_path=data_path, dataset_name= hpars.experiment.exp_name, batch_size=hpars.batch_size)
         train_loader = data_loader
         valid_loader = data_loader
         test_loader = data_loader

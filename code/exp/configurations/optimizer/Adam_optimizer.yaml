@@ -1,4 +1,4 @@
-### myOptimizer.yaml
+### AdamW_optimizer.yaml
 
 # Options for the Adam optimizer
 lr: 1e-5

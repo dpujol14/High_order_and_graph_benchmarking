@@ -39,7 +39,7 @@ class GAT(nn.Module):
                                                        in_feats=self.hidden_dim,
                                                        out_feats=self.n_classes,
                                                        edge_feat_dim = self.edge_feats_dim,
-                                                       final=False) for _ in range(self.n_heads)]
+                                                       final=True) for _ in range(self.n_heads)]
                 for j, attention in enumerate(self.attentions):
                     self.add_module('attention_{}_{}'.format(i, j), attention)
             else:
@@ -58,8 +58,6 @@ class GAT(nn.Module):
     def forward(self, node_feats, edge_feats, edge_indices, adj, training=True):
         x_hat = node_feats
         for i, single_att_layer in enumerate(self.attention_layers):
-            # x = self.dropout(x)
-
             if i == self.model_depth - 1:
                 # If it is the last layer, then we perform average aggregation
                 x_hat = torch.mean(
@@ -69,8 +67,4 @@ class GAT(nn.Module):
                 x_hat = torch.cat([att(x_hat, edge_feats, edge_indices, adj, training) for att in single_att_layer],
                                   dim=1)
 
-            # x = self.dropout(x)
-            # x = F.elu(self.out_att(x, adj, training))
-
-        x = F.elu(x_hat)
-        return x
+        return x_hat

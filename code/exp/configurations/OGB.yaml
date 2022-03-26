@@ -5,7 +5,7 @@ seed: 1234
 early_stopping_wait: 3
 early_stop_metric: 'val_loss'
 gpus: -1
-batch_size: 1
+batch_size: 8
 
 # Flags to control the intialization of the embeddings
 use_dropout: True
@@ -13,6 +13,6 @@ use_normalization: True
 
 # Other options
 defaults:
-    - optimizer: myOptimizer
+    - optimizer: Adam_optimizer
     - experiment: ogbg-molhiv
     - model: vanilla_GAT

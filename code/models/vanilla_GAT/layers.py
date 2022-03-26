@@ -40,6 +40,8 @@ class GraphAttentionLayer(nn.Module):
 
         e = self._prepare_attentional_mechanism_input(Wh, We, edge_indices)
 
+        # Concatenate the edge emb to the source
+
         zero_vec = -9e15 *torch.ones_like(e)
         attention = torch.where(adj > 0, e, zero_vec)
         attention = F.softmax(attention, dim=1)

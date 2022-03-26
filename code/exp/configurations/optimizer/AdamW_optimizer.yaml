@@ -1,0 +1,8 @@
+### AdamW_optimizer.yaml
+
+# Options for the Adam optimizer
+lr: 1e-5
+b0: 0.9
+b1: 0.999
+amsgrad: True
+freq: 1

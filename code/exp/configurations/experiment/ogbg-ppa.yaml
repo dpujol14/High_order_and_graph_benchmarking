@@ -13,8 +13,8 @@ node_level: False
 # General options of the model
 in_feats: 9
 hidden_dim: 128
-n_classes: 2
-edge_feats_dim: 3
+n_classes: 37
+edge_feats_dim: 7
 depth: 2
 dropout: 0.1
 n_heads: 4
