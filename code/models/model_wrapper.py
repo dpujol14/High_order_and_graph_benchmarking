@@ -53,8 +53,11 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         elif method=='add':
             return torch_geometric.nn.global_add_pool(x=x, batch=batch)
 
-    def forward(self, x, edge_attr, edge_idx, batch):
-        node_feats = torch.tensor(x, dtype=torch.float)
+    def forward(self, x, edge_attr, edge_idx, batch, n_nodes):
+        node_feats = torch.ones(n_nodes, self.hpars.experiment.in_feats) if x is None else torch.tensor(x, dtype=torch.float)
+        if self.hpars.gpus != -1:
+            node_feats = node_feats.cuda()
+
         edge_feats = torch.tensor(edge_attr, dtype=torch.float)
 
         # Run the actual GNN model
@@ -79,8 +82,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         if self.hpars.gpus != -1:
             batch = batch.cuda()
 
-        x, edge_attr, edge_idx, batch, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.y
-        y_hat = self.forward(x, edge_attr, edge_idx, batch)
+        x, edge_attr, edge_idx, batch, n_nodes, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.num_nodes, batch.y
+        y_hat = self.forward(x, edge_attr, edge_idx, batch, n_nodes)
 
         # Filter out the final predictions and the labels (if node-level task)
         #if self.hpars.experiment.node_level:
@@ -106,8 +109,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         if self.hpars.gpus != -1:
             batch = batch.cuda()
 
-        x, edge_attr, edge_idx, batch, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.y
-        y_hat = self.forward(x, edge_attr, edge_idx, batch)
+        x, edge_attr, edge_idx, batch, n_nodes, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.num_nodes, batch.y
+        y_hat = self.forward(x, edge_attr, edge_idx, batch, n_nodes)
 
         # Filter out the final predictions and the labels (if node-level task)
         #if self.hpars.experiment.node_level:
@@ -131,8 +134,8 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         if self.hpars.gpus != -1:
             batch = batch.cuda()
 
-        x, edge_attr, edge_idx, batch, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.y
-        y_hat = self.forward(x, edge_attr, edge_idx, batch)
+        x, edge_attr, edge_idx, batch, n_nodes, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.num_nodes, batch.y
+        y_hat = self.forward(x, edge_attr, edge_idx, batch, n_nodes)
 
         # Filter out the final predictions and the labels (if node-level task)
         #if self.hpars.experiment.node_level:
