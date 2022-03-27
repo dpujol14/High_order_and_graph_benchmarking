@@ -56,9 +56,8 @@ class GINE(nn.Module):
 
 
     def forward(self, x, edge_attr, edge_idx, training=True):
-        x_hat = x
         for i, layer in enumerate(self.layers):
-            x_hat = layer(x_hat, edge_idx, edge_attr)
+            x = layer(x, edge_idx, edge_attr)
+            #x += x_hat
 
-        #x = F.elu(x_hat)
-        return x_hat
+        return x

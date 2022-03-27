@@ -76,6 +76,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
             return F.mse_loss(y_hat, y)
 
     def training_step(self, batch, batch_idx):
+        if self.hpars.gpus != -1:
+            batch = batch.cuda()
+
         x, edge_attr, edge_idx, batch, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.y
         y_hat = self.forward(x, edge_attr, edge_idx, batch)
 
@@ -100,6 +103,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        if self.hpars.gpus != -1:
+            batch = batch.cuda()
+
         x, edge_attr, edge_idx, batch, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.y
         y_hat = self.forward(x, edge_attr, edge_idx, batch)
 
@@ -122,6 +128,9 @@ class GraphNeuralNetworkWrapper(pl.LightningModule):
 
 
     def test_step(self, batch, batch_idx):
+        if self.hpars.gpus != -1:
+            batch = batch.cuda()
+
         x, edge_attr, edge_idx, batch, y = batch.x, batch.edge_attr, batch.edge_index, batch.batch, batch.y
         y_hat = self.forward(x, edge_attr, edge_idx, batch)
 

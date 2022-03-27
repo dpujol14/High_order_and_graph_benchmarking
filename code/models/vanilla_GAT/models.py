@@ -1,12 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .layers import GraphAttentionLayer
+from torch_geometric.nn import GATConv
 
-# This model are obtained from the PyTorch implementation of (https://github.com/Diego999/pyGAT)
+# This model is the vanilla GAT model but substituting the additive interaction of the vanilla self-attention for multiplicative interactions
 class GAT(nn.Module):
     def __init__(self, hpars):
-        """Dense version of vanilla_GAT."""
         super(GAT, self).__init__()
         self.hpars = hpars
         self.n_heads = self.hpars.experiment.n_heads
@@ -17,54 +16,30 @@ class GAT(nn.Module):
         self.hidden_dim = self.hpars.experiment.hidden_dim
         self.model_depth = self.hpars.model.model_depth
 
-        self.dropout = nn.Dropout(self.hpars.experiment.dropout)
+        self.dropout_rate = self.hpars.experiment.dropout
+        self.dropout = nn.Dropout()
 
-        self.attention_layers = []
-
-        # Create the hidden layers that operate in lattent F' dimension
+        self.layers = []
         for i in range(self.model_depth):
-            if i==0:
-                # First layer that maps the input from dimensionality F to F'
-                self.attentions = [GraphAttentionLayer(hpars=self.hpars,
-                                                       in_feats=self.in_feats,
-                                                       out_feats= int(self.hidden_dim / self.n_heads),
-                                                       edge_feat_dim = self.edge_feats_dim,
-                                                       final=False) for _ in range(self.n_heads)]
-                for j, attention in enumerate(self.attentions):
-                     self.add_module('attention_{}_{}'.format(i,j), attention)
+            #in_dim = self.hidden_dim if i != 0 else self.in_feats
+            out_dim = self.hidden_dim
+            concat = True if i != (self.model_depth -1) else False
 
-            elif i == self.model_depth-1:
-                # If this is the last layer, then we need to map it from F' to the output class
-                self.attentions = [GraphAttentionLayer(hpars=self.hpars,
-                                                       in_feats=self.hidden_dim,
-                                                       out_feats=self.n_classes,
-                                                       edge_feat_dim = self.edge_feats_dim,
-                                                       final=True) for _ in range(self.n_heads)]
-                for j, attention in enumerate(self.attentions):
-                    self.add_module('attention_{}_{}'.format(i, j), attention)
-            else:
-                # If this is a hidden layer, then we just do a mapping F' -> F'
-                self.attentions = [
-                    GraphAttentionLayer(hpars=self.hpars,
-                                        in_feats= self.hidden_dim,
-                                        out_feats= int(self.hidden_dim / self.n_heads),
-                                        edge_feat_dim = self.edge_feats_dim,
-                                        final=False) for _ in range(self.n_heads)]
-                for j, attention in enumerate(self.attentions):
-                    self.add_module('attention_{}_{}'.format(i, j), attention)
+            layer = GATConv(in_channels=-1,
+                            out_channels=out_dim,
+                            heads = self.n_heads,
+                            concat = concat,
+                            dropout=self.dropout_rate,
+                            add_self_loops=True,
+                            edge_dim = self.edge_feats_dim)
 
-            self.attention_layers.append(self.attentions)
+            self.layers.append(layer)
+            self.add_module('gat_conv_layer_{}'.format(i), layer)
 
-    def forward(self, node_feats, edge_feats, edge_indices, adj, training=True):
-        x_hat = node_feats
-        for i, single_att_layer in enumerate(self.attention_layers):
-            if i == self.model_depth - 1:
-                # If it is the last layer, then we perform average aggregation
-                x_hat = torch.mean(
-                    torch.stack([att(x_hat, edge_feats, edge_indices, adj, training) for att in single_att_layer]),
-                    dim=1)
-            else:
-                x_hat = torch.cat([att(x_hat, edge_feats, edge_indices, adj, training) for att in single_att_layer],
-                                  dim=1)
 
-        return x_hat
+    def forward(self, x, edge_attr, edge_idx, training=True):
+        for i, layer in enumerate(self.layers):
+            x = layer(x, edge_idx, edge_attr)
+            #x += x_hat  # residual
+
+        return x
